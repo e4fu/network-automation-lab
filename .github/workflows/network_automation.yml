@@ -1,0 +1,34 @@
+name: Network Automation
+
+on:
+  push:
+    branches: [ "main" ]
+  schedule:
+    - cron: "0 3 * * 1"  # Runs every Monday at 3 AM
+
+jobs:
+  configure-network:
+    runs-on: self-hosted
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - name: Install Ansible
+        run: pip install ansible
+
+      - name: Run Ansible Playbook
+        run: ansible-playbook -i inventory configure_devices.yml
+
+      - name: Commit and Push Backup
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git add backups/
+          git commit -m "Automated backup commit" || echo "No changes to commit"
+          git push
+
